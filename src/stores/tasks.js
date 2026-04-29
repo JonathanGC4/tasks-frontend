@@ -1,0 +1,45 @@
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
+import api from '../plugins/axios'
+
+export const useTasksStore = defineStore('tasks', () => {
+    const tasks       = ref([])
+    const loading     = ref(false)
+    const pagination  = ref({})
+
+    async function fetchTasks(filters = {}) {
+        loading.value = true
+        try {
+            const { data } = await api.get('/tasks', { params: filters })
+            tasks.value      = data.data
+            pagination.value = {
+                total:        data.total,
+                currentPage:  data.current_page,
+                lastPage:     data.last_page,
+                perPage:      data.per_page,
+            }
+        } finally {
+            loading.value = false
+        }
+    }
+
+    async function createTask(taskData) {
+        const { data } = await api.post('/tasks', taskData)
+        tasks.value.unshift(data.data)
+        return data.data
+    }
+
+    async function updateTask(id, taskData) {
+        const { data } = await api.patch(`/tasks/${id}`, taskData)
+        const index = tasks.value.findIndex(t => t.id === id)
+        if (index !== -1) tasks.value[index] = data.data
+        return data.data
+    }
+
+    async function deleteTask(id) {
+        await api.delete(`/tasks/${id}`)
+        tasks.value = tasks.value.filter(t => t.id !== id)
+    }
+
+    return { tasks, loading, pagination, fetchTasks, createTask, updateTask, deleteTask }
+})
