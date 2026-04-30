@@ -4,20 +4,11 @@ import { useAuthStore } from '../stores/auth'
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
-        {
-            path: '/',
-            redirect: '/dashboard'
-        },
+        { path: '/', redirect: '/dashboard' },
         {
             path: '/login',
             name: 'login',
             component: () => import('../views/LoginView.vue'),
-            meta: { guest: true }
-        },
-        {
-            path: '/register',
-            name: 'register',
-            component: () => import('../views/RegisterView.vue'),
             meta: { guest: true }
         },
         {
@@ -32,11 +23,21 @@ const router = createRouter({
             component: () => import('../views/ProfileView.vue'),
             meta: { requiresAuth: true }
         },
-      ]
-    
+        {
+            path: '/admin/employees',
+            name: 'employees',
+            component: () => import('../views/admin/EmployeesView.vue'),
+            meta: { requiresAuth: true, requiresAdmin: true }
+        },
+        {
+            path: '/register',
+            name: 'register',
+            component: () => import('../views/RegisterView.vue'),
+            meta: { guest: true }
+        },
+    ]
 })
 
-// Guard de navegación
 router.beforeEach((to) => {
     const auth = useAuthStore()
 
@@ -45,6 +46,10 @@ router.beforeEach((to) => {
     }
 
     if (to.meta.guest && auth.isAuthenticated) {
+        return { name: 'dashboard' }
+    }
+
+    if (to.meta.requiresAdmin && !auth.isAdmin) {
         return { name: 'dashboard' }
     }
 })

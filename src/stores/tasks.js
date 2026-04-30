@@ -3,9 +3,9 @@ import { ref } from 'vue'
 import api from '../plugins/axios'
 
 export const useTasksStore = defineStore('tasks', () => {
-    const tasks       = ref([])
-    const loading     = ref(false)
-    const pagination  = ref({})
+    const tasks      = ref([])
+    const loading    = ref(false)
+    const pagination = ref({})
 
     async function fetchTasks(filters = {}) {
         loading.value = true
@@ -13,10 +13,10 @@ export const useTasksStore = defineStore('tasks', () => {
             const { data } = await api.get('/tasks', { params: filters })
             tasks.value      = data.data
             pagination.value = {
-                total:        data.total,
-                currentPage:  data.current_page,
-                lastPage:     data.last_page,
-                perPage:      data.per_page,
+                total:       data.total,
+                currentPage: data.current_page,
+                lastPage:    data.last_page,
+                perPage:     data.per_page,
             }
         } finally {
             loading.value = false
@@ -41,5 +41,24 @@ export const useTasksStore = defineStore('tasks', () => {
         tasks.value = tasks.value.filter(t => t.id !== id)
     }
 
-    return { tasks, loading, pagination, fetchTasks, createTask, updateTask, deleteTask }
+    // Comentarios
+    async function fetchComments(taskId) {
+        const { data } = await api.get(`/tasks/${taskId}/comments`)
+        return data.data
+    }
+
+    async function addComment(taskId, body) {
+        const { data } = await api.post(`/tasks/${taskId}/comments`, { body })
+        return data.data
+    }
+
+    async function deleteComment(taskId, commentId) {
+        await api.delete(`/tasks/${taskId}/comments/${commentId}`)
+    }
+
+    return {
+        tasks, loading, pagination,
+        fetchTasks, createTask, updateTask, deleteTask,
+        fetchComments, addComment, deleteComment
+    }
 })
