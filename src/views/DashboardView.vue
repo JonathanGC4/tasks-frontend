@@ -19,6 +19,12 @@
                         class="text-gray-600 dark:text-gray-300 text-sm hidden sm:block hover:text-indigo-600 transition">
                         👋 {{ auth.user?.name }}
                     </router-link>
+                    <router-link
+                        v-if="auth.isAdmin"
+                        to="/admin/stats"
+                        class="text-sm text-gray-600 dark:text-gray-300 hover:text-indigo-600 transition hidden sm:block">
+                        📊 Estadísticas
+                    </router-link>
                     <span :class="[
                         'text-xs px-2 py-1 rounded-full font-medium hidden sm:block',
                         auth.isAdmin
